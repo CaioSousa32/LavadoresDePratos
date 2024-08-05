@@ -81,7 +81,7 @@ const pilhas = [
 const ranking = [];
 let intervaloPratos;
 let tempoInicio;
-const intervaloEntrePratos = 500; // 5 segundos entre adições de pratos
+const intervaloEntrePratos = 2000; // 2 segundos entre adições de pratos
 const maxTotalPratos = 18; // Número máximo de pratos permitidos
 
 // Função para iniciar o jogo e começar a adicionar pratos
@@ -110,8 +110,12 @@ function iniciarJogo() {
     tempoInicio = Date.now(); // Registra o tempo de início do jogo
     let totalPratosAdicionados = 0;
 
+    // Reproduz a música de fundo
+    const backgroundMusic = document.getElementById('background-music');
+    backgroundMusic.play();
+
     // Adiciona pratos um por vez a cada intervalo
-    intervaloPratos = setInterval(() => {
+    iintervaloPratos = setInterval(() => {
         if (totalPratosAdicionados < maxTotalPratos) {
             const pilhaDisponivel = pilhas.find(pilha => pilha.totalEmpilhados < pilha.maxEmpilhamento);
             if (pilhaDisponivel) {
@@ -121,12 +125,18 @@ function iniciarJogo() {
                 if (totalPratosAdicionados >= maxTotalPratos) {
                     // Parar de adicionar novos pratos se o número máximo for atingido
                     clearInterval(intervaloPratos);
+                } else {
+                    // Atualiza o intervalo com base em uma métrica (exemplo: diminui a cada nível)
+                    intervaloEntrePratos = Math.max(1000, intervaloEntrePratos - 100); // Minimiza o intervalo a 1 segundo
+                    clearInterval(intervaloPratos); // Limpa o intervalo anterior
+                    intervaloPratos = setInterval(adicionarPratos, intervaloEntrePratos);
                 }
             }
         }
         verificarLimiteEmpilhamento(); // Verifica se todas as pilhas atingiram o limite
     }, intervaloEntrePratos);
 }
+
 
 // Restante do código JavaScript permanece o mesmo
 
@@ -226,6 +236,7 @@ function lavarPrato() {
         for (const pilha of pilhas) {
             if (pilha.lavarPrato(rotulo)) {
                 sucesso = true;
+                criarConfetes(); // Adiciona confetes quando um prato é lavado
                 break;
             }
         }
@@ -250,6 +261,38 @@ function mostrarMensagem(mensagem) {
     setTimeout(() => {
         messageBox.classList.add('hidden');
     }, 8000);
+}
+
+function criarConfetes() {
+    const container = document.getElementById('confetti');
+    container.innerHTML = ''; // Limpa os confetes anteriores
+
+    // Número de confetes
+    const numConfetes = 100;
+    
+    for (let i = 0; i < numConfetes; i++) {
+        const confettiPiece = document.createElement('div');
+        confettiPiece.classList.add('confetti-piece');
+        
+        // Posiciona aleatoriamente
+        confettiPiece.style.left = `${Math.random() * 100}vw`;
+        confettiPiece.style.top = `${Math.random() * 100}vh`;
+        confettiPiece.style.transform = `rotate(${Math.random() * 360}deg)`;
+        
+        // Ajusta o tempo de animação
+        confettiPiece.style.animationDelay = `${Math.random() * 1}s`;
+        
+        container.appendChild(confettiPiece);
+    }
+}
+
+// Função para adicionar pratos
+function adicionarPratos() {
+    const pilhaDisponivel = pilhas.find(pilha => pilha.totalEmpilhados < pilha.maxEmpilhamento);
+    if (pilhaDisponivel) {
+        const rotulo = gerarSequencia(6); // Gera uma sequência de 6 caracteres
+        pilhaDisponivel.adicionarPrato(rotulo);
+    }
 }
 
 // Inicializa os eventos após o DOM estar pronto
