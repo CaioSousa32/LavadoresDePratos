@@ -81,7 +81,7 @@ const pilhas = [
 const ranking = [];
 let intervaloPratos;
 let tempoInicio;
-const intervaloEntrePratos = 5000; // 5 segundos entre adições de pratos
+const intervaloEntrePratos = 500; // 5 segundos entre adições de pratos
 const maxTotalPratos = 18; // Número máximo de pratos permitidos
 
 // Função para iniciar o jogo e começar a adicionar pratos

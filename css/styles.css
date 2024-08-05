@@ -49,7 +49,7 @@ h1 {
 
 /* Tela de Introdução */
 #intro {
-  margin-top: 50px;
+  margin-top: 10px;
   position: relative;
   animation: slideIn 1s ease-out; /* Animação ao aparecer */
 }
@@ -102,14 +102,14 @@ h1 {
 
 /* Informações do Jogo */
 #game-info {
-  margin-top: 20px;
+  margin-top: 10px;
+  margin-bottom: -32px;
 }
 
 /* Pilhas de Pratos */
 #pilhas {
   display: flex;
   justify-content: center;
-  margin-top: 20px;
   flex-wrap: wrap;
 }
 .pilha {
