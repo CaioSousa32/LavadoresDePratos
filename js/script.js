@@ -95,7 +95,10 @@ function iniciarJogo() {
     }
 
     // Atualiza a interface com o nome do jogador
-    document.getElementById('player-name-display').textContent = `Nome do Jogador: ${nomeJogador}`;
+    const playerNameDisplay = document.getElementById('player-name-display');
+    if (playerNameDisplay) {
+        playerNameDisplay.textContent = `Nome do Jogador: ${nomeJogador}`;
+    }    
 
     document.getElementById('intro').classList.add('hidden');
     
@@ -293,6 +296,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const inputSequencia = document.getElementById('input-sequencia');
     const botaoLavarPrato = document.getElementById('lavar-prato');
 
+    botaoIniciarJogo.removeEventListener('click', iniciarJogo);
     botaoIniciarJogo.addEventListener('click', iniciarJogo);
 
     inputNomeJogador.addEventListener('keypress', function(event) {
