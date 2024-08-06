@@ -1,64 +1,66 @@
 class Prato {
     constructor(rotulo) {
-        this.rotulo = rotulo; // Sequência de 6 caracteres
-        this.lavado = false;
-        this.proximo = null;
+        this.rotulo = rotulo; // Rótulo do prato com 6 caracteres
+        this.lavado = false; // Indica se o prato está lavado ou não
+        this.proximo = null; // Aponta para o próximo prato na lista
     }
 }
 
 class PilhaDePratos {
     constructor(id, maxEmpilhamento = 3) {
-        this.topo = null;
-        this.totalEmpilhados = 0;
-        this.totalLavados = 0;
-        this.maxEmpilhamento = maxEmpilhamento;
-        this.id = id;
+        this.topo = null; // O topo da pilha (início da lista encadeada)
+        this.totalEmpilhados = 0; // Quantidade total de pratos empilhados
+        this.totalLavados = 0; // Quantidade total de pratos lavados
+        this.maxEmpilhamento = maxEmpilhamento; // Máximo de pratos que a pilha pode ter
+        this.id = id; // ID da pilha
     }
 
     adicionarPrato(rotulo) {
         if (this.totalEmpilhados >= this.maxEmpilhamento) {
-            return false; // Não adicionar prato se a pilha estiver cheia
+            return false; // Se a pilha está cheia, não adiciona mais pratos
         }
 
-        const novoPrato = new Prato(rotulo);
-        novoPrato.proximo = this.topo;
-        this.topo = novoPrato;
+        const novoPrato = new Prato(rotulo); // Cria um novo prato
+        novoPrato.proximo = this.topo; // O novo prato aponta para o prato que estava no topo
+        this.topo = novoPrato; // Atualiza o topo da pilha para o novo prato
         this.totalEmpilhados++;
-        atualizarTela();
+        atualizarTela(); // Atualiza a tela com a nova pilha
         return true;
     }
 
     removerPrato() {
-        if (this.topo === null) return null;
-        const pratoRemovido = this.topo;
-        this.topo = this.topo.proximo;
+        if (this.topo === null) return null; // Se a pilha estiver vazia, não tem prato para remover
+        const pratoRemovido = this.topo; // O prato a ser removido é o topo da pilha
+        this.topo = this.topo.proximo; // Atualiza o topo para o próximo prato
         this.totalEmpilhados--;
         return pratoRemovido;
     }
 
     lavarPrato(rotulo) {
-        let pratoAtual = this.topo;
-        let pratoAnterior = null;
+        let pratoAtual = this.topo; // Começa a procurar o prato a partir do topo
+        let pratoAnterior = null; // Guarda o prato anterior para a remoção
         while (pratoAtual !== null) {
-            if (pratoAtual.rotulo === rotulo && !pratoAtual.lavado) {
-                pratoAtual.lavado = true;
+            if (pratoAtual.rotulo === rotulo && !pratoAtual.lavado) { // Encontra o prato com o rótulo correto e que ainda não está lavado
+                pratoAtual.lavado = true; // Marca o prato como lavado
                 this.totalLavados++;
                 this.totalEmpilhados--;
                 // Remove o prato da pilha
                 if (pratoAnterior === null) {
-                    this.topo = pratoAtual.proximo;
+                    this.topo = pratoAtual.proximo; // Se o prato a ser removido é o topo, atualiza o topo
                 } else {
-                    pratoAnterior.proximo = pratoAtual.proximo;
+                    pratoAnterior.proximo = pratoAtual.proximo; // Ajusta o próximo do prato anterior
                 }
-                atualizarTela();
+                atualizarTela(); // Atualiza a tela com a nova pilha
                 verificarVitoria(); // Verifica se todos os pratos foram lavados
                 return true;
             }
-            pratoAnterior = pratoAtual;
-            pratoAtual = pratoAtual.proximo;
+            pratoAnterior = pratoAtual; // Atualiza o prato anterior
+            pratoAtual = pratoAtual.proximo; // Move para o próximo prato na pilha
         }
-        return false;
+        return false; // Retorna falso se o prato não for encontrado
     }
+
+
 
     exibirPilha() {
         const pilhaLista = document.getElementById(`pilha${this.id}-lista`);
