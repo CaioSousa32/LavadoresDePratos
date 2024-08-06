@@ -81,12 +81,13 @@ const pilhas = [
 const ranking = [];
 let intervaloPratos;
 let tempoInicio;
-const intervaloEntrePratos = 2000; // 2 segundos entre adições de pratos
+const intervaloEntrePratos = 3000; // 3 segundos entre adições de pratos
 const maxTotalPratos = 18; // Número máximo de pratos permitidos
+let jogoEncerrado = false; // Flag para evitar múltiplos registros de fim de jogo
 
 // Função para iniciar o jogo e começar a adicionar pratos
-// Função para iniciar o jogo e começar a adicionar pratos
 function iniciarJogo() {
+    jogoEncerrado = false; // Reseta a flag de jogo encerrado
     const nomeJogador = document.getElementById('player-name').value.trim();
     if (!nomeJogador) {
         mostrarMensagem('Por favor, insira seu nome antes de iniciar o jogo.');
@@ -96,26 +97,26 @@ function iniciarJogo() {
     // Atualiza a interface com o nome do jogador
     document.getElementById('player-name-display').textContent = `Nome do Jogador: ${nomeJogador}`;
 
-    // Oculta o campo de entrada e o botão "Iniciar Jogo"
     document.getElementById('intro').classList.add('hidden');
     
     // Mostra as informações do jogo
     document.getElementById('game-info').classList.remove('hidden');
     document.getElementById('pilhas').classList.remove('hidden');
-    document.getElementById('controls').classList.remove('hidden'); // Mostra a seção de controles
+    document.getElementById('controls').classList.remove('hidden');
+
+    document.getElementById('volume-controls').style.display = 'block'; 
 
     clearInterval(intervaloPratos);
-    resetarPilhas(); // Limpa as pilhas no início do jogo
-    atualizarTela(); // Atualiza a tela inicialmente
+    resetarPilhas(); 
+    atualizarTela(); 
     tempoInicio = Date.now(); // Registra o tempo de início do jogo
     let totalPratosAdicionados = 0;
 
-    // Reproduz a música de fundo
     const backgroundMusic = document.getElementById('background-music');
     backgroundMusic.play();
 
-    // Adiciona pratos um por vez a cada intervalo
-    iintervaloPratos = setInterval(() => {
+    // Começa a adicionar pratos
+    intervaloPratos = setInterval(() => {
         if (totalPratosAdicionados < maxTotalPratos) {
             const pilhaDisponivel = pilhas.find(pilha => pilha.totalEmpilhados < pilha.maxEmpilhamento);
             if (pilhaDisponivel) {
@@ -123,23 +124,13 @@ function iniciarJogo() {
                 pilhaDisponivel.adicionarPrato(rotulo);
                 totalPratosAdicionados++;
                 if (totalPratosAdicionados >= maxTotalPratos) {
-                    // Parar de adicionar novos pratos se o número máximo for atingido
                     clearInterval(intervaloPratos);
-                } else {
-                    // Atualiza o intervalo com base em uma métrica (exemplo: diminui a cada nível)
-                    intervaloEntrePratos = Math.max(1000, intervaloEntrePratos - 100); // Minimiza o intervalo a 1 segundo
-                    clearInterval(intervaloPratos); // Limpa o intervalo anterior
-                    intervaloPratos = setInterval(adicionarPratos, intervaloEntrePratos);
                 }
             }
         }
         verificarLimiteEmpilhamento(); // Verifica se todas as pilhas atingiram o limite
     }, intervaloEntrePratos);
 }
-
-
-// Restante do código JavaScript permanece o mesmo
-
 
 // Função para gerar uma sequência de caracteres
 function gerarSequencia(length) {
@@ -151,19 +142,19 @@ function gerarSequencia(length) {
     return sequencia;
 }
 
-// Função para resetar as pilhas
 function resetarPilhas() {
     pilhas.forEach(pilha => {
         while (pilha.topo !== null) {
             pilha.removerPrato();
         }
-        // Limpa contagens de pratos lavados e empilhados
         pilha.totalEmpilhados = 0;
         pilha.totalLavados = 0;
     });
 }
 
 function registrarRanking() {
+    if (jogoEncerrado) return;
+
     const tempoFim = Date.now();
     const tempoTotal = (tempoFim - tempoInicio) / 1000; // Tempo total em segundos
     const totalLavados = pilhas.reduce((acc, pilha) => acc + pilha.totalLavados, 0);
@@ -177,7 +168,9 @@ function registrarRanking() {
             tempoTotal,
             tempoMedioPorPrato
         });
-        ranking.sort((a, b) => b.totalLavados - a.totalLavados || a.tempoMedioPorPrato - b.tempoMedioPorPrato); // Ordena por pratos lavados e tempo médio por prato
+
+        // Ordena por pratos lavados e tempo médio por prato
+        ranking.sort((a, b) => b.totalLavados - a.totalLavados || a.tempoMedioPorPrato - b.tempoMedioPorPrato); 
         atualizarRanking();
     }
 
@@ -186,11 +179,13 @@ function registrarRanking() {
     document.getElementById('game-info').classList.add('hidden');
     document.getElementById('pilhas').classList.add('hidden');
     document.getElementById('ranking').classList.remove('hidden');
+
+    jogoEncerrado = true;
 }
 
 function atualizarRanking() {
     const rankingList = document.getElementById('ranking-list');
-    rankingList.innerHTML = '';
+    rankingList.innerHTML = ''; 
     ranking.forEach((entry, index) => {
         const li = document.createElement('li');
         li.textContent = `#${index + 1} ${entry.jogador} - Pratos Lavados: ${entry.totalLavados}, Tempo Total: ${entry.tempoTotal.toFixed(2)} segundos, Tempo Médio por Prato: ${entry.tempoMedioPorPrato} segundos`;
@@ -223,10 +218,11 @@ function verificarLimiteEmpilhamento() {
 }
 
 function encerrarJogo() {
+    if (jogoEncerrado) return;
+
     clearInterval(intervaloPratos);
     registrarRanking();
 }
-
 function lavarPrato() {
     const rotulo = document.getElementById('input-sequencia').value.trim();
     let sucesso = false;
@@ -236,7 +232,7 @@ function lavarPrato() {
         for (const pilha of pilhas) {
             if (pilha.lavarPrato(rotulo)) {
                 sucesso = true;
-                criarConfetes(); // Adiciona confetes quando um prato é lavado
+                criarConfetes();
                 break;
             }
         }
@@ -247,7 +243,6 @@ function lavarPrato() {
         mostrarMensagem('Sequência inválida. Deve ter 6 caracteres.');
     }
 
-    // Limpa o campo de entrada após tentar lavar o prato
     document.getElementById('input-sequencia').value = '';
 }
 
@@ -265,21 +260,18 @@ function mostrarMensagem(mensagem) {
 
 function criarConfetes() {
     const container = document.getElementById('confetti');
-    container.innerHTML = ''; // Limpa os confetes anteriores
+    container.innerHTML = ''; 
 
-    // Número de confetes
     const numConfetes = 100;
     
     for (let i = 0; i < numConfetes; i++) {
         const confettiPiece = document.createElement('div');
         confettiPiece.classList.add('confetti-piece');
         
-        // Posiciona aleatoriamente
         confettiPiece.style.left = `${Math.random() * 100}vw`;
         confettiPiece.style.top = `${Math.random() * 100}vh`;
         confettiPiece.style.transform = `rotate(${Math.random() * 360}deg)`;
         
-        // Ajusta o tempo de animação
         confettiPiece.style.animationDelay = `${Math.random() * 1}s`;
         
         container.appendChild(confettiPiece);
@@ -295,32 +287,55 @@ function adicionarPratos() {
     }
 }
 
-// Inicializa os eventos após o DOM estar pronto
 document.addEventListener('DOMContentLoaded', function() {
     const inputNomeJogador = document.getElementById('player-name');
     const botaoIniciarJogo = document.getElementById('start-game');
     const inputSequencia = document.getElementById('input-sequencia');
     const botaoLavarPrato = document.getElementById('lavar-prato');
 
-    // Adiciona evento de clique ao botão "Iniciar Jogo"
     botaoIniciarJogo.addEventListener('click', iniciarJogo);
 
-    // Adiciona evento de tecla ao campo de entrada do nome do jogador
     inputNomeJogador.addEventListener('keypress', function(event) {
         if (event.key === 'Enter') {
-            event.preventDefault(); // Evita o comportamento padrão
+            event.preventDefault();
             iniciarJogo();
         }
     });
 
-    // Adiciona evento de clique ao botão "Lavar Prato"
     botaoLavarPrato.addEventListener('click', lavarPrato);
 
-    // Adiciona evento de tecla ao campo de entrada da sequência
     inputSequencia.addEventListener('keypress', function(event) {
         if (event.key === 'Enter') {
-            event.preventDefault(); // Evita o comportamento padrão
+            event.preventDefault();
             lavarPrato();
         }
-    });
+    }); 
+
+    const volumeBtn = document.getElementById('mute-btn');
+    const volumeSlider = document.getElementById('volume-slider');
+    const backgroundMusic = document.getElementById('background-music');
+    
+    let isMuted = false;
+
+    function atualizarVolume() {
+        backgroundMusic.volume = volumeSlider.value;
+    }
+
+    function alternarMute() {
+        if (isMuted) {
+            backgroundMusic.muted = false;
+            volumeBtn.textContent = '🔊'; 
+            volumeSlider.value = backgroundMusic.volume; 
+        } else {
+            backgroundMusic.muted = true;
+            volumeBtn.textContent = '🔈'; 
+            volumeSlider.value = 0; 
+        }
+        isMuted = !isMuted;
+    }
+
+    volumeSlider.addEventListener('input', atualizarVolume);
+    volumeBtn.addEventListener('click', alternarMute);
+
+    backgroundMusic.volume = volumeSlider.value;
 });
